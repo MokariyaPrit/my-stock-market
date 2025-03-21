@@ -17,7 +17,10 @@ const Register = () => {
       const user = await registerUser(name, email, password);
       if (user) {
         alert("User registered successfully! 100,000 coins have been credited to your account.");
-        navigate("/profile");
+        // Delay navigation slightly to allow any potential state updates
+        setTimeout(() => {
+          navigate("/profile");
+        }, 100); // Adjust delay as needed
       }
     } catch (error: any) {
       alert(error.message);

@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { TextField, Button, Container, Typography, Box, Paper } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../services/authService"; 
+import { loginUser } from "../services/authService";
 import { loginSuccess } from "../redux/store/authSlice";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase"; // Adjust path as needed
+import { auth } from "../firebase";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,11 +13,12 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [isAuthChecked, setIsAuthChecked] = useState(false); // Add state to track auth check
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthChecked(true); // Mark auth check as complete
       if (user) {
-        // console.log("User already logged in:", user);
         navigate("/dashboard");
       }
     });
@@ -27,22 +28,20 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
       const userData = await loginUser(email, password);
-      // console.log("Login Response:", userData); // Debug output
-      
+
       if (userData && userData.email) {
         dispatch(
           loginSuccess({
-            id: userData.id, 
-            name: userData.name || "Unknown", 
-            email: userData.email || "", 
-            role: userData.role || "user", 
-            coins: userData.coins || 0, 
+            id: userData.id,
+            name: userData.name || "Unknown",
+            email: userData.email || "",
+            role: userData.role || "user",
+            coins: userData.coins || 0,
           })
         );
-        // console.log("Navigating to dashboard...");
         navigate("/dashboard");
       } else {
         alert("Error: Invalid user data received.");
@@ -54,7 +53,20 @@ const Login = () => {
       setLoading(false);
     }
   };
-  
+
+  if (!isAuthChecked) {
+    // Render a loading state while checking Firebase auth
+    return (
+      <Container maxWidth="sm">
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
+          <Typography variant="h6" textAlign="center">
+            Checking authentication...
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
+
   return (
     <Container maxWidth="sm">
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -63,21 +75,21 @@ const Login = () => {
             Login
           </Typography>
           <form onSubmit={handleLogin}>
-            <TextField 
-              label="Email" 
+            <TextField
+              label="Email"
               type="email"
-              fullWidth 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               margin="normal"
               required
             />
-            <TextField 
-              label="Password" 
-              type="password" 
-              fullWidth 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
+            <TextField
+              label="Password"
+              type="password"
+              fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               required
             />
