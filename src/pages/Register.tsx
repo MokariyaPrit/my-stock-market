@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { TextField, Button, Container, Typography, Box, Link, Paper } from "@mui/material";
+import { TextField, Button, Container, Typography, Box, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/authService";
 
@@ -17,7 +17,7 @@ const Register = () => {
       const user = await registerUser(name, email, password);
       if (user) {
         alert("User registered successfully! 100,000 coins have been credited to your account.");
-        navigate("/login");
+        navigate("/profile");
       }
     } catch (error: any) {
       alert(error.message);
@@ -60,11 +60,6 @@ const Register = () => {
               margin="normal"
               required
             />
-            <Box display="flex" justifyContent="center" mt={1} mb={2}>
-              <Link href="/login" underline="hover">
-                Already have an account? Login
-              </Link>
-            </Box>
             <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading} sx={{ mt: 2 }}>
               {loading ? "Registering..." : "Register"}
             </Button>

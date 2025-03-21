@@ -69,7 +69,7 @@ export const loginUser = async (email: string, password: string) => {
     // ✅ Store user data in localStorage
     localStorage.setItem("user", JSON.stringify(fullUserData));
 
-    console.log("✅ User logged in:", fullUserData);
+    // console.log("✅ User logged in:", fullUserData);
     return fullUserData;
   } catch (error) {
     console.error("❌ Login error:", error);

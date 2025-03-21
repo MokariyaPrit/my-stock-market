@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { fetchUsers, deleteUser, updateUser } from "../services/userService";
-import { getCurrentUser } from "../services/userService";
+import { fetchUsers, deleteUser, updateUser, getCurrentUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
-import {User} from "../services/userService"
+import { User } from "../services/userService";
 import {
   Table,
   TableBody,
@@ -18,10 +17,15 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   Snackbar,
   Alert,
-  Box
+  Box,
+  Card,
+  CardContent,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 const AdminDashboard = () => {
@@ -33,8 +37,9 @@ const AdminDashboard = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [toast, setToast] = useState({ open: false, message: "", type: "success" });
-
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Mobile if < 600px
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -44,8 +49,14 @@ const AdminDashboard = () => {
           navigate("/unauthorized");
           return;
         }
-        const usersData = await fetchUsers();
-        setUsers(usersData);
+
+        const allUsers = await fetchUsers();
+        // Filter out admins and superadmins if current user is an admin (not superadmin)
+        const filteredUsers =
+          currentUserData.role === "admin"
+            ? allUsers.filter((user) => user.role === "user")
+            : allUsers; // Superadmins see all users
+        setUsers(filteredUsers);
       } catch (err) {
         console.error("Error loading dashboard:", err);
         setError("Failed to load users.");
@@ -105,106 +116,261 @@ const AdminDashboard = () => {
     setDeleteUserId(null);
   };
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <CircularProgress color="primary" />
+      </Box>
+    );
+  }
+  if (error) {
+    return (
+      <Box sx={{ textAlign: "center", mt: 4 }}>
+        <Typography color="error">{error}</Typography>
+      </Box>
+    );
+  }
 
   return (
-    <Box>
-      <TableContainer component={Paper}>
-        <Typography variant="h5" sx={{ padding: 2 }}>User Management</Typography>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        bgcolor: "#f4f6f8",
+        py: { xs: 2, sm: 4 },
+      }}
+    >
+      <Box sx={{ width: "100%", maxWidth: 900, px: { xs: 2, sm: 0 } }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          sx={{ textAlign: "center", fontWeight: "bold", color: "#1976d2", mb: 4 }}
+        >
+          User Management
+        </Typography>
+
+        {isMobile ? (
+          // Mobile: Card-based layout
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {users.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  {editingUser?.id === user.id ? (
-                    <TextField value={editingUser.name} onChange={(e) => handleChange("name", e.target.value)} />
-                  ) : (
-                    user.name
-                  )}
-                </TableCell>
-                <TableCell>
-                  {editingUser?.id === user.id ? (
-                    <TextField value={editingUser.email} onChange={(e) => handleChange("email", e.target.value)} />
-                  ) : (
-                    user.email
-                  )}
-                </TableCell>
-
-
-                {/* <TableCell>
-                  {editingUser?.id === user.id ? (
-                    <Select
-                      value={editingUser.role}
-                      onChange={(e) => handleChange("role", e.target.value as User["role"])}
-                      disabled={currentUser?.role === "admin"} // ❌ Admins CANNOT change roles
-                    >
-                      <MenuItem value="user">User</MenuItem>
-                      <MenuItem value="admin">Admin</MenuItem>
-                      <MenuItem value="superadmin">SuperAdmin</MenuItem>
-                    </Select>
-                  ) : (
-                    user.role
-                  )}
-                </TableCell> */}
-
-
-                <TableCell>
+              <Card
+                key={user.id}
+                sx={{ borderRadius: 2, boxShadow: 3, bgcolor: "white", p: 2 }}
+              >
+                <CardContent sx={{ p: 1, textAlign: "center" }}>
                   {editingUser?.id === user.id ? (
                     <>
-                      <Button variant="contained" color="primary" onClick={handleSave}>Save</Button>
-                      <Button variant="outlined" color="secondary" onClick={() => setEditingUser(null)} sx={{ ml: 2 }}>
-                        Cancel
-                      </Button>
+                      <TextField
+                        fullWidth
+                        label="Name"
+                        value={editingUser.name}
+                        onChange={(e) => handleChange("name", e.target.value)}
+                        margin="normal"
+                        variant="outlined"
+                        size="small"
+                      />
+                      <TextField
+                        fullWidth
+                        label="Email"
+                        value={editingUser.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        margin="normal"
+                        variant="outlined"
+                        size="small"
+                      />
                     </>
                   ) : (
                     <>
-                      <Button variant="outlined" color="secondary" onClick={() => handleEdit(user)}>
-                        Edit
-                      </Button>
-                      <Button variant="contained" color="error" onClick={() => handleDelete(user.id)} sx={{ ml: 2 }}>
-                        Delete
-                      </Button>
+                      <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2" }}>
+                        {user.name}
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: "#555" }}>
+                        <strong>Email:</strong> {user.email}
+                      </Typography>
                     </>
                   )}
-                </TableCell>
-              </TableRow>
+                  <Box sx={{ mt: 2, display: "flex", justifyContent: "center", gap: 2 }}>
+                    {editingUser?.id === user.id ? (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={handleSave}
+                          sx={{ borderRadius: 1 }}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="secondary"
+                          size="small"
+                          onClick={() => setEditingUser(null)}
+                          sx={{ borderRadius: 1 }}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                          onClick={() => handleEdit(user)}
+                          sx={{ borderRadius: 1 }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          size="small"
+                          onClick={() => handleDelete(user.id)}
+                          sx={{ borderRadius: 1 }}
+                        >
+                          Delete
+                        </Button>
+                      </>
+                    )}
+                  </Box>
+                </CardContent>
+              </Card>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+          </Box>
+        ) : (
+          // Desktop/Tablet: Table layout
+          <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: 4 }}>
+            <Table>
+              <TableHead sx={{ bgcolor: "#1976d2" }}>
+                <TableRow>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Name</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Email</TableCell>
+                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users.map((user, index) => (
+                  <TableRow key={user.id} hover sx={{ bgcolor: index % 2 === 0 ? "#fafafa" : "white" }}>
+                    <TableCell>
+                      {editingUser?.id === user.id ? (
+                        <TextField
+                          value={editingUser.name}
+                          onChange={(e) => handleChange("name", e.target.value)}
+                          variant="outlined"
+                          size="small"
+                        />
+                      ) : (
+                        user.name
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {editingUser?.id === user.id ? (
+                        <TextField
+                          value={editingUser.email}
+                          onChange={(e) => handleChange("email", e.target.value)}
+                          variant="outlined"
+                          size="small"
+                        />
+                      ) : (
+                        user.email
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {editingUser?.id === user.id ? (
+                        <>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleSave}
+                            sx={{ mr: 1, borderRadius: 1 }}
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            onClick={() => setEditingUser(null)}
+                            sx={{ borderRadius: 1 }}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={() => handleEdit(user)}
+                            sx={{ mr: 1, borderRadius: 1 }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => handleDelete(user.id)}
+                            sx={{ borderRadius: 1 }}
+                          >
+                            Delete
+                          </Button>
+                        </>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
 
-      {/* Confirm Save Dialog */}
-      <Dialog open={openSaveDialog} onClose={() => setOpenSaveDialog(false)}>
-        <DialogTitle>Confirm Changes</DialogTitle>
-        <DialogContent><Typography>Do you want to save these changes?</Typography></DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenSaveDialog(false)} color="secondary">Cancel</Button>
-          <Button onClick={confirmUpdate} color="primary" variant="contained">Save</Button>
-        </DialogActions>
-      </Dialog>
+        {/* Confirm Save Dialog */}
+        <Dialog open={openSaveDialog} onClose={() => setOpenSaveDialog(false)} sx={{ "& .MuiDialog-paper": { borderRadius: 2 } }}>
+          <DialogTitle sx={{ fontWeight: "bold", color: "#1976d2" }}>Confirm Changes</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Do you want to save these changes?</DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setOpenSaveDialog(false)} color="secondary" variant="outlined" sx={{ borderRadius: 1 }}>
+              Cancel
+            </Button>
+            <Button onClick={confirmUpdate} color="primary" variant="contained" sx={{ borderRadius: 1 }}>
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* Confirm Delete Dialog */}
-      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent><Typography>Are you sure you want to delete this user?</Typography></DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} color="secondary">Cancel</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">Delete</Button>
-        </DialogActions>
-      </Dialog>
+        {/* Confirm Delete Dialog */}
+        <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} sx={{ "& .MuiDialog-paper": { borderRadius: 2 } }}>
+          <DialogTitle sx={{ fontWeight: "bold", color: "#d32f2f" }}>Confirm Deletion</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Are you sure you want to delete this user?</DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setOpenDeleteDialog(false)} color="secondary" variant="outlined" sx={{ borderRadius: 1 }}>
+              Cancel
+            </Button>
+            <Button onClick={confirmDelete} color="error" variant="contained" sx={{ borderRadius: 1 }}>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* Toast Notification */}
-      <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast({ ...toast, open: false })}>
-      <Alert severity={toast.type as "success" | "error" | "warning" | "info"}>{toast.message}</Alert>
-      </Snackbar>
+        {/* Toast Notification */}
+        <Snackbar
+          open={toast.open}
+          autoHideDuration={3000}
+          onClose={() => setToast({ ...toast, open: false })}
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        >
+          <Alert severity={toast.type as "success" | "error"} sx={{ width: "100%", borderRadius: 2 }}>
+            {toast.message}
+          </Alert>
+        </Snackbar>
+      </Box>
     </Box>
   );
 };

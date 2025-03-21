@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { TextField, Button, Container, Typography, Box, Link, Paper } from "@mui/material";
+import { useState, useEffect } from "react";
+import { TextField, Button, Container, Typography, Box, Paper } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/authService"; 
 import { loginSuccess } from "../redux/store/authSlice";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase"; // Adjust path as needed
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,12 +14,23 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // console.log("User already logged in:", user);
+        navigate("/dashboard");
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
   
     try {
-      const userData = await loginUser(email, password); // ✅ Ensure `loginUser` returns a complete User object
+      const userData = await loginUser(email, password);
+      // console.log("Login Response:", userData); // Debug output
       
       if (userData && userData.email) {
         dispatch(
@@ -29,6 +42,7 @@ const Login = () => {
             coins: userData.coins || 0, 
           })
         );
+        // console.log("Navigating to dashboard...");
         navigate("/dashboard");
       } else {
         alert("Error: Invalid user data received.");
@@ -41,8 +55,6 @@ const Login = () => {
     }
   };
   
-  
-
   return (
     <Container maxWidth="sm">
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -69,14 +81,6 @@ const Login = () => {
               margin="normal"
               required
             />
-            <Box display="flex" justifyContent="space-between" mt={1} mb={2}>
-              <Link href="/forgot-password" underline="hover">
-                Forgot Password?
-              </Link>
-              <Link href="/register" underline="hover">
-                Register
-              </Link>
-            </Box>
             <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading} sx={{ mt: 2 }}>
               {loading ? "Logging in..." : "Login"}
             </Button>

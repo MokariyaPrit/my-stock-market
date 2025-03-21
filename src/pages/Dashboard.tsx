@@ -24,12 +24,12 @@ const Dashboard = () => {
   const roleBasedRoutes = {
     user: [
       // { path: "/RealStockTrade", label: "RealStockTrade" },
-      { path: "/Leaderboard", label: "Leaderboard" },
       { path: "/Portfolio", label: "Portfolio" },
-      { path: "/profile", label: "Profile" },
-      { path: "/transaction-history", label: "Transactions" },
       { path: "/stock-trade", label: "Stock Trade" },
+      { path: "/transaction-history", label: "Transactions" },
+      { path: "/Leaderboard", label: "Leaderboard" },
       { path: "/coin-transactions", label: "Coin Transactions" },
+      { path: "/profile", label: "Profile" },
       { path: "/request-coins", label: "Request Coins" },
       { path: "/ActivityLogs", label: "Activity Logs" },
       { path: "/track-requests", label: "Track Requests" },

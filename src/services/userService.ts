@@ -86,7 +86,7 @@ export const createUserInFirestore = async (userId: string, name: string, email:
 export const deleteUser = async (userId: string) => {
   try {
     await deleteDoc(doc(db, "users", userId));
-    console.log(`User with ID ${userId} deleted successfully.`);
+    // console.log(`User  deleted successfully.`);
   } catch (error) {
     console.error("Error deleting user:", error);
   }
