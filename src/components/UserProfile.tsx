@@ -75,7 +75,7 @@ const UserProfile = () => {
           const credential = EmailAuthProvider.credential(currentUser.email || "", currentPassword);
           await reauthenticateWithCredential(currentUser, credential);
           await updatePassword(currentUser, newPassword);
-          await logActivity(user.id, "Changed password.");
+          await logActivity(user.id);
           setNewPassword("");
           setCurrentPassword("");
         }
