@@ -66,8 +66,8 @@ const ActivityLogs = () => {
         }
       });
   
-      // ✅ Always show 5 logs (fill with placeholders if needed)
-      const maxLogs = 5;
+      // ✅ Always show 1 logs (fill with placeholders if needed)
+      const maxLogs = 1;
       const emptyLogs = Array.from({ length: Math.max(0, maxLogs - uniqueDateLogs.length) }, (_, i) => ({
         id: `placeholder-${i}`,
         action: "No activity",

@@ -38,6 +38,7 @@ const Dashboard = () => {
       { path: "/Portfolio", label: "Portfolio" },
       { path: "/profile", label: "Profile" },
       { path: "/transaction-history", label: "Transactions" },
+      { path: "/Leaderboard", label: "Leaderboard" },
       { path: "/stock-trade", label: "Stock Trade" },
       { path: "/coin-transactions", label: "Coin Transactions" },
       { path: "/request-coins", label: "Request Coins" },
@@ -49,6 +50,7 @@ const Dashboard = () => {
     superadmin: [
       { path: "/StockPanel", label: "StockPanel" },
       { path: "/SuperAdminStockEdit", label: "SuperAdminStockEdit" },
+      { path: "/Leaderboard", label: "Leaderboard" },
       { path: "/profile", label: "Profile" },
       { path: "/transaction-history", label: "Transactions" },
       { path: "/stock-trade", label: "Stock Trade" },
