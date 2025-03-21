@@ -66,7 +66,7 @@ const UserProfile = () => {
     try {
       if (formData.name !== user.name) {
         await updateUser(user.id, formData);
-        await logActivity(user.id, "Updated profile details.");
+        await logActivity(user.id);
       }
       if (newPassword) {
         const auth = getAuth();
