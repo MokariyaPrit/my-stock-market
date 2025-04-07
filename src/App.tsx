@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider} from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider } from './context/AuthContext';
 
@@ -27,27 +27,35 @@ import LeaderboardTest from './pages/LeaderboardTest';
 import UserProfile from './components/UserProfile';
 import StockPanel from './pages/StockPanel';
 import SuperAdminStockEdit from './pages/SuperAdminStockEdit';
+import { useEffect, useMemo, useState } from 'react';
 // import RealStockTrade from './components/RealStockTrade';
+import {lightTheme,darkTheme} from "./theme/theme"
 
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
 
 function App() {
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
+// Persist mode to localStorage
+useEffect(() => {
+  const storedMode = localStorage.getItem("theme") as 'light' | 'dark' | null;
+  if (storedMode) {
+    setMode(storedMode);
+  }
+}, []);
+
+const toggleTheme = () => {
+  const newMode = mode === "light" ? "dark" : "light";
+  setMode(newMode);
+  localStorage.setItem("theme", newMode);
+};
+
+const theme = useMemo(() => (mode === "light" ? lightTheme : darkTheme), [mode]);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
         <Router>
-          <Navbar />
+          <Navbar toggleTheme={toggleTheme} currentMode={mode} />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />

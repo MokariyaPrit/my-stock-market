@@ -15,8 +15,13 @@ import {
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from '@mui/icons-material/Close'; // Import CloseIcon
+import { Brightness7,Brightness4 } from "@mui/icons-material";
+// type Props = {
+//   toggleTheme: () => void;
+//   currentMode: "light" | "dark";
+// };
 
-const Navbar = () => {
+const Navbar = ({ toggleTheme, currentMode }:any) => {
   const { user, logout, isAdmin, isSuperAdmin, loading } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -51,6 +56,7 @@ const Navbar = () => {
     handleMobileClose();
   };
 
+
   return (
     <AppBar position="static">
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -68,6 +74,9 @@ const Navbar = () => {
         >
           Stock Market App
         </Typography>
+        <IconButton color="inherit" onClick={toggleTheme}>
+          {currentMode === "dark" ? <Brightness7 /> : <Brightness4 />}
+        </IconButton>
 
         {/* Desktop Menu */}
         <Box sx={{ display: { xs: "none", md: "flex" }, alignItems: "center" }}>
