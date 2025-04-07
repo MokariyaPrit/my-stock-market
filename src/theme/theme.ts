@@ -45,81 +45,82 @@ const ERROR = {
 };
 
 // Create theme settings based on mode (light/dark)
-const getDesignTokens = (mode: PaletteMode):any => ({
+const getDesignTokens = (mode: PaletteMode): any => ({
   palette: {
     mode,
     ...(mode === 'light'
       ? {
-          // Light mode
-          primary: PRIMARY,
-          secondary: SECONDARY,
-          success: SUCCESS,
-          info: INFO,
-          warning: WARNING,
-          error: ERROR,
-          background: {
-            default: '#f8fafc',
-            paper: '#ffffff',
-          },
-          text: {
-            primary: '#1e293b',
-            secondary: '#64748b',
-            disabled: '#94a3b8',
-          },
-          divider: '#e2e8f0',
-          action: {
-            active: '#64748b',
-            hover: alpha('#64748b', 0.05),
-            selected: alpha('#64748b', 0.1),
-            disabled: '#cbd5e1',
-            disabledBackground: '#f1f5f9',
-          },
-        }
+        // Light mode
+        primary: PRIMARY,
+        secondary: SECONDARY,
+        success: SUCCESS,
+        info: INFO,
+        warning: WARNING,
+        error: ERROR,
+        background: {
+          default: '#f8fafc',
+          paper: '#ffffff',
+        },
+        text: {
+          primary: '#1e293b',
+          secondary: '#64748b',
+          disabled: '#94a3b8',
+        },
+        divider: '#e2e8f0',
+        action: {
+          active: '#64748b',
+          hover: alpha('#64748b', 0.05),
+          selected: alpha('#64748b', 0.1),
+          disabled: '#cbd5e1',
+          disabledBackground: '#f1f5f9',
+        },
+      }
       : {
-          // Dark mode
-          primary: {
-            ...PRIMARY,
-            main: '#3b82f6', // Slightly lighter in dark mode
-          },
-          secondary: {
-            ...SECONDARY,
-            main: '#a78bfa', // Slightly lighter in dark mode
-          },
-          success: {
-            ...SUCCESS,
-            main: '#34d399', // Slightly lighter in dark mode
-          },
-          info: {
-            ...INFO,
-            main: '#38bdf8', // Slightly lighter in dark mode
-          },
-          warning: {
-            ...WARNING,
-            main: '#fbbf24', // Slightly lighter in dark mode
-          },
-          error: {
-            ...ERROR,
-            main: '#f87171', // Slightly lighter in dark mode
-          },
-          background: {
-            default: '#0f172a',
-            paper: '#1e293b',
-          },
-          text: {
-            primary: '#f8fafc',
-            secondary: '#cbd5e1',
-            disabled: '#94a3b8',
-          },
-          divider: '#334155',
-          action: {
-            active: '#cbd5e1',
-            hover: alpha('#cbd5e1', 0.05),
-            selected: alpha('#cbd5e1', 0.1),
-            disabled: '#475569',
-            disabledBackground: '#334155',
-          },
-        }),
+        // Dark mode
+        primary: {
+          ...PRIMARY,
+          main: '#3b82f6', // Slightly lighter in dark mode
+        },
+        secondary: {
+          ...SECONDARY,
+          main: '#a78bfa', // Slightly lighter in dark mode
+        },
+        success: {
+          ...SUCCESS,
+          main: '#34d399', // Slightly lighter in dark mode
+        },
+        info: {
+          ...INFO,
+          main: '#38bdf8', // Slightly lighter in dark mode
+        },
+        warning: {
+          ...WARNING,
+          main: '#fbbf24', // Slightly lighter in dark mode
+        },
+        error: {
+          ...ERROR,
+          main: '#f87171', // Slightly lighter in dark mode
+        },
+        background: {
+          default: '#0f172a',
+          paper: '#1e293b',
+        },
+        text: {
+          primary: '#f8fafc',
+          secondary: '#cbd5e1',
+          disabled: '#94a3b8',
+        },
+        divider: '#334155',
+        action: {
+          active: '#cbd5e1',
+          hover: alpha('#cbd5e1', 0.05),
+          selected: alpha('#cbd5e1', 0.1),
+          disabled: '#475569',
+          disabledBackground: '#334155',
+        },
+      }),
   },
+ 
   typography: {
     fontFamily: [
       'Inter',
@@ -212,6 +213,16 @@ const getDesignTokens = (mode: PaletteMode):any => ({
       textTransform: 'uppercase',
     },
   },
+
+ custom: {
+    cardShadow: "0 2px 12px rgba(0, 0, 0, 0.08)", // for cards
+    mediumShadow: "0 4px 20px rgba(0, 0, 0, 0.12)", // for modals/popups
+    lightShadow: "0 1px 4px rgba(0, 0, 0, 0.06)", // for inputs or hover
+    deepShadow: "0 8px 30px rgba(0, 0, 0, 0.18)", // for large containers
+    insetShadow: "inset 0 2px 6px rgba(0,0,0,0.1)", // for inset fields
+    glowingShadow: "0 0 10px rgba(33, 150, 243, 0.4)", // for active states
+  },
+
   shape: {
     borderRadius: 8,
   },
@@ -242,6 +253,8 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     '0px 11px 14px -7px rgba(0,0,0,0.05),0px 23px 36px 3px rgba(0,0,0,0.03),0px 9px 44px 8px rgba(0,0,0,0.05)',
     '0px 11px 15px -7px rgba(0,0,0,0.05),0px 24px 38px 3px rgba(0,0,0,0.03),0px 9px 46px 8px rgba(0,0,0,0.05)',
   ],
+
+
   components: {
     MuiCssBaseline: {
       styleOverrides: {
@@ -290,7 +303,7 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiAvatar: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[200] : theme.palette.grey[700],
           color: theme.palette.mode === 'light' ? theme.palette.grey[700] : theme.palette.grey[200],
         }),
@@ -298,7 +311,7 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiButton: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           borderRadius: theme.shape.borderRadius,
           boxShadow: 'none',
           textTransform: 'none',
@@ -307,7 +320,7 @@ const getDesignTokens = (mode: PaletteMode):any => ({
             boxShadow: 'none',
           },
         }),
-        contained: ({ theme } :any) => ({
+        contained: ({ theme }: any) => ({
           boxShadow: theme.shadows[2],
           '&:hover': {
             boxShadow: theme.shadows[4],
@@ -349,7 +362,7 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiCard: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           boxShadow: theme.shadows[2],
           borderRadius: theme.shape.borderRadius * 1.5,
           position: 'relative',
@@ -388,7 +401,7 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiChip: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           borderRadius: theme.shape.borderRadius,
           fontWeight: 500,
           '&.MuiChip-outlined': {
@@ -409,7 +422,7 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiDialog: {
       styleOverrides: {
-        paper: ({ theme } :any) => ({
+        paper: ({ theme }: any) => ({
           borderRadius: theme.shape.borderRadius * 1.5,
           boxShadow: theme.shadows[5],
         }),
@@ -440,14 +453,14 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiDivider: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           borderColor: theme.palette.divider,
         }),
       },
     },
     MuiIconButton: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           borderRadius: theme.shape.borderRadius,
           padding: 8,
           '&:hover': {
@@ -461,7 +474,7 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiInputBase: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           borderRadius: theme.shape.borderRadius,
           '& fieldset': {
             borderWidth: '1.5px',
@@ -492,58 +505,58 @@ const getDesignTokens = (mode: PaletteMode):any => ({
             borderWidth: '1.5px',
           },
         },
-        notchedOutline: ({ theme } :any) => ({
+        notchedOutline: ({ theme }: any) => ({
           borderColor: theme.palette.mode === 'light' ? theme.palette.grey[300] : theme.palette.grey[700],
         }),
       },
     },
     MuiPaper: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           backgroundImage: 'none',
           backgroundColor: theme.palette.background.paper,
           transition: 'box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
         }),
-        rounded: ({ theme } :any) => ({
+        rounded: ({ theme }: any) => ({
           borderRadius: theme.shape.borderRadius * 1.5,
         }),
-        elevation1: ({ theme } :any) => ({
+        elevation1: ({ theme }: any) => ({
           boxShadow: theme.shadows[1],
         }),
-        elevation2: ({ theme } :any) => ({
+        elevation2: ({ theme }: any) => ({
           boxShadow: theme.shadows[2],
         }),
-        elevation3: ({ theme } :any) => ({
+        elevation3: ({ theme }: any) => ({
           boxShadow: theme.shadows[3],
         }),
-        elevation4: ({ theme } :any) => ({
+        elevation4: ({ theme }: any) => ({
           boxShadow: theme.shadows[4],
         }),
-        elevation5: ({ theme } :any) => ({
+        elevation5: ({ theme }: any) => ({
           boxShadow: theme.shadows[5],
         }),
       },
     },
     MuiTableCell: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           borderBottom: `1px solid ${theme.palette.divider}`,
           padding: '16px',
         }),
         head: {
           fontWeight: 600,
-          color: 'black',
+          // color: '#cbd5e1',
         },
       },
     },
     MuiTableRow: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           '&:last-child td': {
             borderBottom: 0,
           },
           '&:hover': {
-            backgroundColor: alpha(theme.palette.action.hover, 0.1),
+            backgroundColor: alpha(theme.palette.action.selected, 0.1),
           },
         }),
       },
@@ -573,23 +586,23 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiAlert: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           borderRadius: theme.shape.borderRadius,
           padding: '12px 16px',
         }),
-        standardSuccess: ({ theme } :any) => ({
+        standardSuccess: ({ theme }: any) => ({
           backgroundColor: alpha(theme.palette.success.main, 0.1),
           color: theme.palette.success.dark,
         }),
-        standardInfo: ({ theme } :any) => ({
+        standardInfo: ({ theme }: any) => ({
           backgroundColor: alpha(theme.palette.info.main, 0.1),
           color: theme.palette.info.dark,
         }),
-        standardWarning: ({ theme } :any) => ({
+        standardWarning: ({ theme }: any) => ({
           backgroundColor: alpha(theme.palette.warning.main, 0.1),
           color: theme.palette.warning.dark,
         }),
-        standardError: ({ theme } :any) => ({
+        standardError: ({ theme }: any) => ({
           backgroundColor: alpha(theme.palette.error.main, 0.1),
           color: theme.palette.error.dark,
         }),
@@ -604,20 +617,20 @@ const getDesignTokens = (mode: PaletteMode):any => ({
     },
     MuiTooltip: {
       styleOverrides: {
-        tooltip: ({ theme } :any) => ({
+        tooltip: ({ theme }: any) => ({
           backgroundColor: theme.palette.grey[800],
           borderRadius: theme.shape.borderRadius,
           padding: '8px 12px',
           fontSize: '0.75rem',
         }),
-        arrow: ({ theme } :any) => ({
+        arrow: ({ theme }: any) => ({
           color: theme.palette.grey[800],
         }),
       },
     },
     MuiDataGrid: {
       styleOverrides: {
-        root: ({ theme } :any) => ({
+        root: ({ theme }: any) => ({
           border: 'none',
           '& .MuiDataGrid-columnHeader': {
             backgroundColor: theme.palette.primary.main,

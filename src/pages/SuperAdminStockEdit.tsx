@@ -49,7 +49,7 @@ const SuperAdminStockEdit = () => {
   });
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Mobile if screen width < 600px
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     const fetchStocks = async () => {
@@ -127,7 +127,7 @@ const SuperAdminStockEdit = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: "#f5f5f5",
+        bgcolor: theme.palette.background.default,
         py: { xs: 2, sm: 4 },
       }}
     >
@@ -136,35 +136,35 @@ const SuperAdminStockEdit = () => {
           variant="h4"
           component="h1"
           gutterBottom
-          sx={{ textAlign: "center", fontWeight: "bold", color: "#1976d2", mb: 4 }}
+          sx={{ textAlign: "center", fontWeight: "bold", color: theme.palette.primary.main, mb: 4 }}
         >
           Super Admin - Manage Stocks
         </Typography>
 
+        {/* Mobile Cards */}
         {isMobile ? (
-          // Mobile: Card-based layout with centered buttons
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {stocks.map((stock) => (
               <Card
                 key={stock.id}
                 sx={{
                   borderRadius: 2,
-                  boxShadow: 3,
-                  bgcolor: "white",
+                  boxShadow: theme.shadows[2],
+                  bgcolor: theme.palette.background.paper,
                   p: 2,
                 }}
               >
                 <CardContent sx={{ p: 1, textAlign: "center" }}>
-                  <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2", mb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: "bold", color: theme.palette.primary.main, mb: 1 }}>
                     {stock.symbol}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#555" }}>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
                     <strong>Name:</strong> {stock.name}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#555" }}>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
                     <strong>Price:</strong> ₹{stock.price}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#555", mb: 2 }}>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 2 }}>
                     <strong>Shares:</strong> {stock.availableShares}
                   </Typography>
                   <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
@@ -190,19 +190,16 @@ const SuperAdminStockEdit = () => {
             ))}
           </Box>
         ) : (
-          // Desktop/Tablet: Table layout
           <TableContainer
             component={Paper}
-            sx={{ borderRadius: 2, boxShadow: 4, overflowX: "auto" }}
+            sx={{ borderRadius: 2, boxShadow: theme.shadows[4], overflowX: "auto" }}
           >
             <Table>
               <TableHead>
-                <TableRow sx={{ bgcolor: "#1976d2" }}>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Symbol</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Name</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Price</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Available Shares</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Actions</TableCell>
+                <TableRow sx={{ bgcolor: theme.palette.primary.main }}>
+                  {['Symbol', 'Name', 'Price', 'Available Shares', 'Actions'].map((label) => (
+                    <TableCell key={label} sx={{ color: "white", fontWeight: "bold" }}>{label}</TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -236,153 +233,160 @@ const SuperAdminStockEdit = () => {
           </TableContainer>
         )}
 
-        {/* Edit Dialog */}
-        {editingStock && (
-          <Dialog
-            open={!!editingStock}
-            onClose={() => setEditingStock(null)}
-            sx={{ "& .MuiDialog-paper": { borderRadius: 2, p: 2, width: "100%", maxWidth: 400 } }}
+     
+   
+   
+   
+   {/* Edit Dialog */}
+    {editingStock && (
+      <Dialog
+        open={!!editingStock}
+        onClose={() => setEditingStock(null)}
+        sx={{ "& .MuiDialog-paper": { borderRadius: 2, p: 2, width: "100%", maxWidth: 400 } }}
+      >
+        <DialogTitle sx={{ fontWeight: "bold", color: "#1976d2" }}>Edit Stock</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Stock Symbol"
+            value={editingStock.symbol}
+            onChange={(e) => handleChange("symbol", e.target.value)}
+            margin="normal"
+            variant="outlined"
+            size="small"
+          />
+          <TextField
+            fullWidth
+            label="Company Name"
+            value={editingStock.name}
+            onChange={(e) => handleChange("name", e.target.value)}
+            margin="normal"
+            variant="outlined"
+            size="small"
+          />
+          <TextField
+            fullWidth
+            label="Stock Price"
+            type="number"
+            value={editingStock.price}
+            onChange={(e) => handleChange("price", e.target.value)}
+            margin="normal"
+            variant="outlined"
+            size="small"
+          />
+          <TextField
+            fullWidth
+            label="Available Shares"
+            type="number"
+            value={editingStock.availableShares}
+            onChange={(e) => handleChange("availableShares", e.target.value)}
+            margin="normal"
+            variant="outlined"
+            size="small"
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setEditingStock(null)}
+            color="secondary"
+            variant="outlined"
+            sx={{ borderRadius: 1 }}
           >
-            <DialogTitle sx={{ fontWeight: "bold", color: "#1976d2" }}>Edit Stock</DialogTitle>
-            <DialogContent>
-              <TextField
-                fullWidth
-                label="Stock Symbol"
-                value={editingStock.symbol}
-                onChange={(e) => handleChange("symbol", e.target.value)}
-                margin="normal"
-                variant="outlined"
-                size="small"
-              />
-              <TextField
-                fullWidth
-                label="Company Name"
-                value={editingStock.name}
-                onChange={(e) => handleChange("name", e.target.value)}
-                margin="normal"
-                variant="outlined"
-                size="small"
-              />
-              <TextField
-                fullWidth
-                label="Stock Price"
-                type="number"
-                value={editingStock.price}
-                onChange={(e) => handleChange("price", e.target.value)}
-                margin="normal"
-                variant="outlined"
-                size="small"
-              />
-              <TextField
-                fullWidth
-                label="Available Shares"
-                type="number"
-                value={editingStock.availableShares}
-                onChange={(e) => handleChange("availableShares", e.target.value)}
-                margin="normal"
-                variant="outlined"
-                size="small"
-              />
-            </DialogContent>
-            <DialogActions sx={{ px: 3, pb: 2 }}>
-              <Button
-                onClick={() => setEditingStock(null)}
-                color="secondary"
-                variant="outlined"
-                sx={{ borderRadius: 1 }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSave}
-                color="primary"
-                variant="contained"
-                sx={{ borderRadius: 1 }}
-              >
-                Save Changes
-              </Button>
-            </DialogActions>
-          </Dialog>
-        )}
-
-        {/* Confirm Save Dialog */}
-        <Dialog
-          open={openSaveDialog}
-          onClose={() => setOpenSaveDialog(false)}
-          sx={{ "& .MuiDialog-paper": { borderRadius: 2 } }}
-        >
-          <DialogTitle sx={{ fontWeight: "bold" }}>Confirm Changes</DialogTitle>
-          <DialogContent>
-            <DialogContentText>Are you sure you want to save these changes?</DialogContentText>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button
-              onClick={() => setOpenSaveDialog(false)}
-              color="secondary"
-              variant="outlined"
-              sx={{ borderRadius: 1 }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={confirmUpdate}
-              color="primary"
-              variant="contained"
-              sx={{ borderRadius: 1 }}
-            >
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Confirm Delete Dialog */}
-        <Dialog
-          open={openDeleteDialog}
-          onClose={() => setOpenDeleteDialog(false)}
-          sx={{ "& .MuiDialog-paper": { borderRadius: 2 } }}
-        >
-          <DialogTitle sx={{ fontWeight: "bold", color: "#d32f2f" }}>Confirm Deletion</DialogTitle>
-          <DialogContent>
-            <DialogContentText>Are you sure you want to delete this stock? This action cannot be undone.</DialogContentText>
-          </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-            <Button
-              onClick={() => setOpenDeleteDialog(false)}
-              color="secondary"
-              variant="outlined"
-              sx={{ borderRadius: 1 }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={confirmDelete}
-              color="error"
-              variant="contained"
-              sx={{ borderRadius: 1 }}
-            >
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Snackbar Notification */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert
-            severity={snackbar.type}
-            sx={{ width: "100%", borderRadius: 2 }}
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSave}
+            color="primary"
+            variant="contained"
+            sx={{ borderRadius: 1 }}
           >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )}
+
+    {/* Confirm Save Dialog */}
+    <Dialog
+      open={openSaveDialog}
+      onClose={() => setOpenSaveDialog(false)}
+      sx={{ "& .MuiDialog-paper": { borderRadius: 2 } }}
+    >
+      <DialogTitle sx={{ fontWeight: "bold" }}>Confirm Changes</DialogTitle>
+      <DialogContent>
+        <DialogContentText>Are you sure you want to save these changes?</DialogContentText>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button
+          onClick={() => setOpenSaveDialog(false)}
+          color="secondary"
+          variant="outlined"
+          sx={{ borderRadius: 1 }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={confirmUpdate}
+          color="primary"
+          variant="contained"
+          sx={{ borderRadius: 1 }}
+        >
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+    {/* Confirm Delete Dialog */}
+    <Dialog
+      open={openDeleteDialog}
+      onClose={() => setOpenDeleteDialog(false)}
+      sx={{ "& .MuiDialog-paper": { borderRadius: 2 } }}
+    >
+      <DialogTitle sx={{ fontWeight: "bold", color: "#d32f2f" }}>Confirm Deletion</DialogTitle>
+      <DialogContent>
+        <DialogContentText>Are you sure you want to delete this stock? This action cannot be undone.</DialogContentText>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button
+          onClick={() => setOpenDeleteDialog(false)}
+          color="secondary"
+          variant="outlined"
+          sx={{ borderRadius: 1 }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={confirmDelete}
+          color="error"
+          variant="contained"
+          sx={{ borderRadius: 1 }}
+        >
+          Delete
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+    {/* Snackbar Notification */}
+    <Snackbar
+      open={snackbar.open}
+      autoHideDuration={3000}
+      onClose={() => setSnackbar({ ...snackbar, open: false })}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+    >
+      <Alert
+        severity={snackbar.type}
+        sx={{ width: "100%", borderRadius: 2 }}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        {snackbar.message}
+      </Alert>
+    </Snackbar>
+  </Box>
       </Box>
-    </Box>
+    
   );
 };
 
 export default SuperAdminStockEdit;
+   
+  

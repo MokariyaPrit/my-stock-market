@@ -1,6 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getUserActivityLogs } from "../services/activityService";
-import { auth } from "../firebase";
 import {
   List,
   ListItem,
@@ -17,6 +15,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { Event as EventIcon } from "@mui/icons-material";
+import { getUserActivityLogs } from "../services/activityService";
+import { auth } from "../firebase";
 
 interface ActivityLog {
   id: string;
@@ -37,26 +37,24 @@ const ActivityLogs = () => {
       setLoading(false);
       return;
     }
-  
+
     setLoading(true);
     setError(null);
-  
+
     try {
       const userLogs = await getUserActivityLogs(auth.currentUser.uid);
-  
-      // ✅ Convert Firestore timestamps to JavaScript Date objects
+
       const logsWithDates = userLogs.map((log) => ({
         ...log,
         timestamp: log.timestamp ? new Date(log.timestamp) : undefined,
       }));
-  
-      // ✅ Function to remove duplicate dates while keeping different times
+
       const uniqueDateLogs: ActivityLog[] = [];
       const seenDates = new Set();
-  
+
       logsWithDates.forEach((log) => {
         if (log.timestamp) {
-          const dateString = log.timestamp.toISOString().split("T")[0]; // Extract date part (YYYY-MM-DD)
+          const dateString = log.timestamp.toISOString().split("T")[0];
           if (!seenDates.has(dateString)) {
             seenDates.add(dateString);
             uniqueDateLogs.push(log);
@@ -65,15 +63,17 @@ const ActivityLogs = () => {
           uniqueDateLogs.push(log);
         }
       });
-  
-      // ✅ Always show 1 logs (fill with placeholders if needed)
+
       const maxLogs = 1;
-      const emptyLogs = Array.from({ length: Math.max(0, maxLogs - uniqueDateLogs.length) }, (_, i) => ({
-        id: `placeholder-${i}`,
-        action: "No activity",
-        timestamp: undefined,
-      }));
-  
+      const emptyLogs = Array.from(
+        { length: Math.max(0, maxLogs - uniqueDateLogs.length) },
+        (_, i) => ({
+          id: `placeholder-${i}`,
+          action: "No activity",
+          timestamp: undefined,
+        })
+      );
+
       setLogs([...uniqueDateLogs.slice(0, maxLogs), ...emptyLogs]);
     } catch (err) {
       console.error("Error fetching logs:", err);
@@ -82,8 +82,6 @@ const ActivityLogs = () => {
       setLoading(false);
     }
   }, []);
-  
-  
 
   useEffect(() => {
     fetchLogs();
@@ -96,33 +94,43 @@ const ActivityLogs = () => {
         justifyContent: "center",
         alignItems: "center",
         minHeight: "100vh",
-        bgcolor: "#f4f6f8",
-        padding: isMobile ? 2 : 4,
+        bgcolor: theme.palette.background.default,
+        px: 2,
+        py: 4,
       }}
     >
       <Paper
         elevation={3}
         sx={{
-          maxWidth: isMobile ? "100%" : 600,
-          width: "95%",
-          p: 3,
-          borderRadius: 2,
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          width: "100%",
+          maxWidth: 600,
+          p: isMobile ? 2 : 4,
+          borderRadius: 3,
+          boxShadow: theme.custom.deepShadow,
         }}
       >
-        <Typography variant="h5" gutterBottom sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
+        <Typography
+          variant="h5"
+          component="h2"
+          gutterBottom
+          sx={{
+            textAlign: "center",
+            fontWeight: "bold",
+            color: theme.palette.text.primary,
+          }}
+        >
           Activity Logs
         </Typography>
 
-        {loading && (
+        {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
-            <CircularProgress />
+            <CircularProgress color="primary" />
           </Box>
-        )}
-
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-
-        {!loading && logs.length > 0 && (
+        ) : error ? (
+          <Alert severity="error" sx={{ my: 2 }}>
+            {error}
+          </Alert>
+        ) : (
           <List>
             {logs.map((log, index) => (
               <React.Fragment key={log.id}>
@@ -133,17 +141,24 @@ const ActivityLogs = () => {
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={log.action}
+                    primary={
+                      <Typography
+                        variant="body1"
+                        fontWeight={500}
+                        color={theme.palette.text.primary}
+                      >
+                        {log.action}
+                      </Typography>
+                    }
                     secondary={
-                      log.timestamp ? (
-                        <Typography sx={{ display: "inline" }} component="span" variant="body2" color="text.primary">
-                          {log.timestamp.toLocaleString()}
-                        </Typography>
-                      ) : (
-                        <Typography sx={{ display: "inline" }} component="span" variant="body2" color="text.secondary">
-                          No time available
-                        </Typography>
-                      )
+                      <Typography
+                        variant="body2"
+                        color={log.timestamp ? "text.secondary" : "text.disabled"}
+                      >
+                        {log.timestamp
+                          ? log.timestamp.toLocaleString()
+                          : "No timestamp available"}
+                      </Typography>
                     }
                   />
                 </ListItem>

@@ -7,24 +7,25 @@ import {
   Typography,
   List,
   ListItem,
+  ListItemAvatar,
+  Avatar,
   ListItemText,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import PersonIcon from "@mui/icons-material/Person";
 
 const LeaderboardTest = () => {
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Mobile if < 600px
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     getLeaderboardUsers().then((data) => {
-      // Filter to only include users with role: "user"
-      const filteredUsers = data.filter((user) => user.role === "user");
-      // Sort users by coins in descending order (highest to lowest)
-      const sortedUsers = filteredUsers.sort((a, b) => b.coins - a.coins);
-      // console.log("🔥 Sorted Leaderboard Users:", sortedUsers);
-      setUsers(sortedUsers);
+      const filtered = data.filter((u) => u.role === "user");
+      const sorted = filtered.sort((a, b) => b.coins - a.coins);
+      setUsers(sorted);
     });
   }, []);
 
@@ -35,7 +36,7 @@ const LeaderboardTest = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: "#f4f6f8",
+        bgcolor: theme.palette.background.default,
         py: { xs: 2, sm: 4 },
       }}
     >
@@ -47,18 +48,19 @@ const LeaderboardTest = () => {
           sx={{
             textAlign: "center",
             fontWeight: "bold",
-            color: "#1976d2",
+            color: theme.palette.primary.main,
             mb: 4,
           }}
         >
-          Leaderboard
+          🏆 Leaderboard
         </Typography>
+
         <Card
           sx={{
             width: "100%",
             borderRadius: 3,
-            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-            bgcolor: "white",
+            boxShadow: 4,
+            bgcolor: theme.palette.background.paper,
           }}
         >
           <CardContent sx={{ p: isMobile ? 2 : 3 }}>
@@ -67,25 +69,53 @@ const LeaderboardTest = () => {
                 users.map((user, index) => (
                   <ListItem
                     key={user.id}
-                    divider={index < users.length - 1} // No divider on last item
+                    divider={index < users.length - 1}
                     sx={{
                       py: 1.5,
-                      "&:hover": { bgcolor: "#f5f5f5" }, // Subtle hover effect
+                      "&:hover": {
+                        bgcolor: theme.palette.action.hover,
+                        cursor: "pointer",
+                      },
                     }}
                   >
+                    <ListItemAvatar>
+                      <Avatar
+                        sx={{
+                          bgcolor:
+                            index === 0
+                              ? "#FFD700"
+                              : index === 1
+                              ? "#C0C0C0"
+                              : index === 2
+                              ? "#CD7F32"
+                              : theme.palette.primary.main,
+                        }}
+                      >
+                        {index < 3 ? <EmojiEventsIcon /> : <PersonIcon />}
+                      </Avatar>
+                    </ListItemAvatar>
+
                     <ListItemText
                       primary={
-                        <Typography variant="body1" sx={{ fontWeight: "medium" }}>
+                        <Typography
+                          variant="body1"
+                          sx={{ fontWeight: "medium", fontSize: isMobile ? "1rem" : "1.1rem" }}
+                        >
                           {`${index + 1}. ${user.name}`}
                         </Typography>
                       }
                       secondary={
-                        <Typography variant="body2" sx={{ color: "#555" }}>
-                          {`${user.coins} Coins`}
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: "bold",
+                            fontSize: isMobile ? "0.9rem" : "1rem",
+                            color: theme.palette.primary.main,
+                          }}
+                        >
+                          {`${user.coins.toFixed(2)} Coins`}
                         </Typography>
                       }
-                      primaryTypographyProps={{ fontSize: isMobile ? "1rem" : "1.1rem" }}
-                      secondaryTypographyProps={{ fontSize: isMobile ? "0.875rem" : "0.95rem" }}
                     />
                   </ListItem>
                 ))
@@ -93,7 +123,7 @@ const LeaderboardTest = () => {
                 <ListItem>
                   <ListItemText
                     primary={
-                      <Typography variant="body1" sx={{ textAlign: "center", color: "#555" }}>
+                      <Typography variant="body1" sx={{ textAlign: "center", color: "#777" }}>
                         No users found.
                       </Typography>
                     }

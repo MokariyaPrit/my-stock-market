@@ -16,14 +16,16 @@ import {
 } from "@mui/material";
 import { db } from "../firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { useTheme } from "@mui/material/styles";
 
 const StockPanel = () => {
+  const theme = useTheme();
   const [stock, setStock] = useState({ symbol: "", name: "", price: "", availableShares: "" });
   const [openDialog, setOpenDialog] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const handleChange = (e:any) => {
+  const handleChange = (e: any) => {
     setStock({ ...stock, [e.target.name]: e.target.value.trim() });
   };
 
@@ -70,34 +72,31 @@ const StockPanel = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: "#f5f5f5", // Light gray background for contrast
-        p: { xs: 2, sm: 3 }, // Padding responsive to screen size
+        bgcolor: theme.palette.background.default,
+        px: 2,
+        py: 4,
       }}
     >
       <Card
         sx={{
           width: "100%",
-          maxWidth: 450, // Slightly wider for better form layout
-          borderRadius: 3,
-          boxShadow: 6, // Elevated shadow for depth
-          bgcolor: "white",
-          p: { xs: 2, sm: 3 }, // Responsive padding inside card
+          maxWidth: 480,
+          borderRadius: 4,
+          boxShadow: theme.custom.cardShadow,
+          p: 3,
         }}
       >
         <CardContent>
           <Typography
             variant="h5"
-            component="h1"
+            fontWeight="bold"
+            align="center"
+            color="primary"
             gutterBottom
-            sx={{
-              textAlign: "center",
-              fontWeight: "bold",
-              color: "#1976d2", // MUI primary color
-            }}
           >
             Add New Stock
           </Typography>
-          <Box component="form" onSubmit={(e) => e.preventDefault()} sx={{ mt: 2 }}>
+          <Box component="form" onSubmit={(e) => e.preventDefault()} mt={2}>
             <TextField
               fullWidth
               label="Stock Symbol"
@@ -105,9 +104,7 @@ const StockPanel = () => {
               value={stock.symbol}
               onChange={handleChange}
               margin="normal"
-              variant="outlined"
-              size="small" // Compact input fields
-              sx={{ mb: 2 }}
+              size="small"
             />
             <TextField
               fullWidth
@@ -116,9 +113,7 @@ const StockPanel = () => {
               value={stock.name}
               onChange={handleChange}
               margin="normal"
-              variant="outlined"
               size="small"
-              sx={{ mb: 2 }}
             />
             <TextField
               fullWidth
@@ -128,9 +123,7 @@ const StockPanel = () => {
               value={stock.price}
               onChange={handleChange}
               margin="normal"
-              variant="outlined"
               size="small"
-              sx={{ mb: 2 }}
             />
             <TextField
               fullWidth
@@ -140,9 +133,7 @@ const StockPanel = () => {
               value={stock.availableShares}
               onChange={handleChange}
               margin="normal"
-              variant="outlined"
               size="small"
-              sx={{ mb: 2 }}
             />
             <Button
               variant="contained"
@@ -151,11 +142,10 @@ const StockPanel = () => {
               onClick={handleConfirm}
               sx={{
                 mt: 3,
-                py: 1.5, // Taller button for better clickability
+                py: 1.5,
                 borderRadius: 2,
-                textTransform: "none", // Avoid all-caps for a modern look
-                fontSize: "1rem",
-                fontWeight: "medium",
+                textTransform: "none",
+                fontWeight: 500,
               }}
             >
               Add Stock
@@ -164,41 +154,35 @@ const StockPanel = () => {
         </CardContent>
       </Card>
 
-      {/* Confirmation Dialog */}
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        sx={{ "& .MuiDialog-paper": { borderRadius: 2, p: 1 } }}
-      >
-        <DialogTitle sx={{ fontWeight: "bold", color: "#1976d2" }}>
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle fontWeight="bold" color="primary.main">
           Confirm Stock Addition
         </DialogTitle>
         <DialogContent>
-          <DialogContentText sx={{ color: "#555" }}>
+          <DialogContentText color="text.secondary">
             Are you sure you want to add this stock to the database?
           </DialogContentText>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
+        <DialogActions>
           <Button
             onClick={handleCloseDialog}
-            color="secondary"
             variant="outlined"
-            sx={{ borderRadius: 1 }}
+            color="secondary"
+            sx={{ borderRadius: 2 }}
           >
             Cancel
           </Button>
           <Button
             onClick={addStockToDatabase}
-            color="primary"
             variant="contained"
-            sx={{ borderRadius: 1 }}
+            color="primary"
+            sx={{ borderRadius: 2 }}
           >
             Confirm
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar Notification */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

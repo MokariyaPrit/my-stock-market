@@ -29,7 +29,7 @@ const TransactionHistory = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Mobile if < 600px
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     if (!user) return;
@@ -46,7 +46,7 @@ const TransactionHistory = () => {
         }
 
         const userTransactions = allTransactions
-          .filter((t) => t.userId && t.userId === user.uid)
+          .filter((t) => t.userId === user.uid)
           .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
         setTransactions(userTransactions);
@@ -60,17 +60,17 @@ const TransactionHistory = () => {
     fetchTransactions();
   }, [user]);
 
-  const handleChangePage = (_: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+  const handleChangePage = (_: unknown, newPage: number) => setPage(newPage);
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to first page when rows per page changes
+    setPage(0);
   };
 
-  // Calculate paginated transactions
-  const paginatedTransactions = transactions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedTransactions = transactions.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Box
@@ -79,7 +79,7 @@ const TransactionHistory = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: "#f4f6f8",
+        bgcolor: theme.palette.background.default,
         py: { xs: 2, sm: 4 },
       }}
     >
@@ -91,7 +91,7 @@ const TransactionHistory = () => {
           sx={{
             textAlign: "center",
             fontWeight: "bold",
-            color: "#1976d2",
+            color: theme.palette.primary.main,
             mb: 4,
           }}
         >
@@ -105,7 +105,6 @@ const TransactionHistory = () => {
         ) : transactions.length > 0 ? (
           <>
             {isMobile ? (
-              // Mobile: Card-based layout
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {paginatedTransactions.map((t, index) => (
                   <Card
@@ -113,15 +112,18 @@ const TransactionHistory = () => {
                     sx={{
                       borderRadius: 2,
                       boxShadow: 3,
-                      bgcolor: "white",
+                      bgcolor: theme.palette.background.paper,
                       p: 2,
                     }}
                   >
                     <CardContent sx={{ p: 1, textAlign: "center" }}>
-                      <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2", mb: 1 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: "bold", color: theme.palette.primary.main, mb: 1 }}
+                      >
                         {t.stockName}
                       </Typography>
-                      <Typography variant="body2" sx={{ color: "#555" }}>
+                      <Typography variant="body2" color="text.secondary">
                         <strong>Type:</strong>{" "}
                         <Chip
                           icon={t.type === "buy" ? <ArrowUpward /> : <ArrowDownward />}
@@ -131,16 +133,16 @@ const TransactionHistory = () => {
                           size="small"
                         />
                       </Typography>
-                      <Typography variant="body2" sx={{ color: "#555" }}>
+                      <Typography variant="body2" color="text.secondary">
                         <strong>Price:</strong> ₹{t.price}
                       </Typography>
-                      <Typography variant="body2" sx={{ color: "#555" }}>
+                      <Typography variant="body2" color="text.secondary">
                         <strong>Quantity:</strong> {t.quantity}
                       </Typography>
-                      <Typography variant="body2" sx={{ color: "#555" }}>
+                      <Typography variant="body2" color="text.secondary">
                         <strong>Subtotal:</strong> ₹{(t.price * t.quantity).toFixed(2)}
                       </Typography>
-                      <Typography variant="body2" sx={{ color: "#555", mt: 1 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                         <strong>Date:</strong>{" "}
                         {new Date(t.timestamp).toLocaleString(undefined, {
                           month: "numeric",
@@ -153,28 +155,27 @@ const TransactionHistory = () => {
                 ))}
               </Box>
             ) : (
-              // Desktop/Tablet: Table layout
-              <Paper sx={{ borderRadius: 3, overflow: "hidden", boxShadow: 4 }}>
+              <Paper
+                sx={{
+                  borderRadius: 3,
+                  overflow: "hidden",
+                  boxShadow: 4,
+                  bgcolor: theme.palette.background.paper,
+                }}
+              >
                 <TableContainer>
                   <Table size="medium">
-                    <TableHead sx={{ bgcolor: "#1976d2" }}>
+                    <TableHead sx={{ bgcolor: theme.palette.primary.main }}>
                       <TableRow>
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }}>Stock (Symbol)</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }} align="right">
-                          Type
-                        </TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }} align="right">
-                          Price
-                        </TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }} align="right">
-                          Qty
-                        </TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }} align="right">
-                          Subtotal
-                        </TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }} align="right">
-                          Date
-                        </TableCell>
+                        {["Stock (Symbol)", "Type", "Price", "Qty", "Subtotal", "Date"].map((text) => (
+                          <TableCell
+                            key={text}
+                            sx={{ color: "white", fontWeight: "bold" }}
+                            align={text === "Stock (Symbol)" ? "left" : "right"}
+                          >
+                            {text}
+                          </TableCell>
+                        ))}
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -182,7 +183,12 @@ const TransactionHistory = () => {
                         <TableRow
                           key={index}
                           hover
-                          sx={{ bgcolor: index % 2 === 0 ? "#fafafa" : "white" }}
+                          sx={{
+                            bgcolor:
+                              index % 2 === 0
+                                ? theme.palette.action.hover
+                                : theme.palette.background.default,
+                          }}
                         >
                           <TableCell>{`${t.stockName} (${t.stockSymbol})`}</TableCell>
                           <TableCell align="right">
@@ -204,7 +210,6 @@ const TransactionHistory = () => {
                 </TableContainer>
               </Paper>
             )}
-            {/* Pagination at the Bottom */}
             <TablePagination
               rowsPerPageOptions={[5, 10, 25]}
               component="div"
@@ -217,7 +222,10 @@ const TransactionHistory = () => {
             />
           </>
         ) : (
-          <Typography variant="body1" sx={{ textAlign: "center", mt: 4, color: "#555" }}>
+          <Typography
+            variant="body1"
+            sx={{ textAlign: "center", mt: 4, color: theme.palette.text.secondary }}
+          >
             No transactions found.
           </Typography>
         )}
