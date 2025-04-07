@@ -106,7 +106,7 @@ const ActivityLogs = () => {
           maxWidth: 600,
           p: isMobile ? 2 : 4,
           borderRadius: 3,
-          boxShadow: theme.custom.deepShadow,
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.18)',
         }}
       >
         <Typography

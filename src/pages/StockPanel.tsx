@@ -82,7 +82,7 @@ const StockPanel = () => {
           width: "100%",
           maxWidth: 480,
           borderRadius: 4,
-          boxShadow: theme.custom.cardShadow,
+          boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)',
           p: 3,
         }}
       >

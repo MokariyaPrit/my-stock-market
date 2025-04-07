@@ -112,7 +112,7 @@ const Portfolio = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Card sx={{ boxShadow: theme.custom.cardShadow, p: 4, borderRadius: 4 }}>
+      <Card sx={{ boxShadow:'0 2px 12px rgba(0, 0, 0, 0.08)', p: 4, borderRadius: 4 }}>
         <Typography variant="h4" fontWeight={600} textAlign="center" gutterBottom>
           Portfolio Overview
         </Typography>
@@ -133,7 +133,7 @@ const Portfolio = () => {
 
               return (
                 <Grid item xs={12} key={stock.symbol}>
-                  <Card sx={{ boxShadow: theme.custom.cardShadow, borderRadius: 3 }}>
+                  <Card sx={{ boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)', borderRadius: 3 }}>
                     <CardContent>
                       <Typography variant="h6" fontWeight={600}>{stock.symbol}</Typography>
                       <Divider sx={{ my: 1 }} />
@@ -157,7 +157,7 @@ const Portfolio = () => {
             })}
           </Grid>
         ) : (
-          <TableContainer component={Paper} sx={{ boxShadow: theme.custom.cardShadow, borderRadius: 3 }}>
+          <TableContainer component={Paper} sx={{ boxShadow: '0 2px 12px rgba(0, 0, 0, 0.08)', borderRadius: 3 }}>
             <Table>
               <TableHead>
                 <TableRow>
