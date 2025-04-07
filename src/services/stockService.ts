@@ -89,10 +89,19 @@ export const subscribeToStockPrices = (callback: (stocks: Stock[]) => void): (()
 
 // Throttled price updates (every 10 minutes)
 let lastUpdate = 0;
-setInterval(async () => {
-  const now = Date.now();
-  if (now - lastUpdate >= 600000) { // 10 minutes = 600,000 milliseconds
+
+async function safeUpdateStockPrices() {
+  try {
     await updateStockPrices();
-    lastUpdate = now;
+    lastUpdate = Date.now(); // Only update if successful
+  } catch (error) {
+    console.error("Failed to update stock prices:", error);
+  }
+}
+
+setInterval(() => {
+  const now = Date.now();
+  if (now - lastUpdate >= 600000) {
+    safeUpdateStockPrices();
   }
 }, 1000); // Check every second
