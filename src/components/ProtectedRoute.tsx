@@ -1,15 +1,24 @@
-import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../redux/store";
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Box, CircularProgress } from '@mui/material';
+// import { User } from 'firebase/auth';
 
-interface Props {
-  children: React.ReactNode; // ✅ Add correct TypeScript type for children
-}
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading, authChecked } = useAuth();
 
-const ProtectedRoute: React.FC<Props> = ({ children }) => {
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
-  
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  if (!authChecked || loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

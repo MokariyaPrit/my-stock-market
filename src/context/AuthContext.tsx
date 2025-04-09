@@ -20,6 +20,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   loading: boolean;
+  authChecked: boolean; // Add this property
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -32,58 +33,79 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<ExtendedUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setLoading(true);
-
-      if (firebaseUser) {
-        const userRef = doc(db, "users", firebaseUser.uid);
-        const userSnap = await getDoc(userRef);
-
-        const role = userSnap.exists() ? userSnap.data().role : "user"; // Default to "user"
-        
-        // ✅ Extend Firebase user object with role
-        const extendedUser: ExtendedUser = { ...firebaseUser, role };
-
-        setUser(extendedUser);
-      } else {
+      try {
+        if (firebaseUser) {
+          const userRef = doc(db, "users", firebaseUser.uid);
+          const userSnap = await getDoc(userRef);
+          const role = userSnap.exists() ? userSnap.data().role : "user";
+          const extendedUser: ExtendedUser = { ...firebaseUser, role };
+          setUser(extendedUser);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Auth error:", error);
         setUser(null);
+      } finally {
+        setLoading(false);
+        setAuthChecked(true);
       }
-
-      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
+  // Don't render anything until initial auth check is complete
+  if (!authChecked) {
+    return null;
+  }
+
   // ✅ Login Function
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      await new Promise(resolve => setTimeout(resolve, 3500)); // Add delay before navigation
+    } catch (error) {
+      throw error;
+    }
   };
 
   // ✅ Register Function (Ensures role is stored)
   const register = async (name: string, email: string, password: string) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const firebaseUser = userCredential.user;
 
-    // ✅ Save user details in Firestore
-    const userDocRef = doc(db, "users", firebaseUser.uid);
-    await setDoc(userDocRef, {
-      name,
-      email,
-      role: "user", // Default role is "user"
-    });
+      // ✅ Save user details in Firestore
+      const userDocRef = doc(db, "users", firebaseUser.uid);
+      await setDoc(userDocRef, {
+        name,
+        email,
+        role: "user", // Default role is "user"
+      });
 
-    // ✅ Extend Firebase user with role
-    const extendedUser: ExtendedUser = { ...firebaseUser, role: "user" };
-    setUser(extendedUser);
+      // ✅ Extend Firebase user with role
+      const extendedUser: ExtendedUser = { ...firebaseUser, role: "user" };
+      setUser(extendedUser);
+      await new Promise(resolve => setTimeout(resolve, 2500)); // Add delay before navigation
+    } catch (error) {
+      throw error;
+    }
   };
 
   // ✅ Logout Function
   const logout = async () => {
-    await signOut(auth);
-    setUser(null);
+    try {
+      await signOut(auth);
+      setUser(null);
+      await new Promise(resolve => setTimeout(resolve, 2500)); // Add delay before navigation
+    } catch (error) {
+      throw error;
+    }
   };
 
   return (
@@ -92,13 +114,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         user, 
         isAdmin: user?.role === "admin", 
         isSuperAdmin: user?.role === "superadmin", 
-        loading, 
+        loading,
+        authChecked, // Add this property
         login, 
         register, 
         logout 
       }}
     >
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
