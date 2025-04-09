@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogActions,
   Box,
+  Divider,
 } from "@mui/material";
 import StockSearch from "../components/StockSearch";
 import { CheckCircle, WarningAmber } from "@mui/icons-material";
@@ -106,6 +107,13 @@ const StockTrade = () => {
 
     fetchUserData();
   }, [user]);
+
+  const calculateTotal = () => {
+    if (selectedStock && quantity > 0) {
+      return selectedStock.price * quantity;
+    }
+    return 0;
+  };
 
   const confirmBuyStock = async () => {
     if (isProcessing) return;
@@ -242,6 +250,30 @@ const StockTrade = () => {
         required
         inputProps={{ min: 1 }}
       />
+
+      {/* Add this Card component to show the total */}
+      {selectedStock && quantity > 0 && (
+        <Card sx={{ my: 2, bgcolor: 'background.paper' }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom>
+              Transaction Summary
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography>Price per share:</Typography>
+              <Typography>₹{selectedStock.price.toFixed(2)}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+              <Typography>Quantity:</Typography>
+              <Typography>{quantity}</Typography>
+            </Box>
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h6">Total:</Typography>
+              <Typography variant="h6" color="primary">₹{calculateTotal().toFixed(2)}</Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
 
       <Button variant="contained" color="primary" onClick={() => setOpenBuyDialog(true)} fullWidth sx={{ mt: 2 }} disabled={isProcessing}>
         Buy
