@@ -1,24 +1,50 @@
 import { useEffect, useState } from "react";
 import { fetchUsers, updateUser, deleteUser, User } from "../services/userService";
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button,
-  TextField, Select, MenuItem, Box, Typography, Dialog, DialogTitle, DialogActions,
-  DialogContent, Snackbar, Alert, useMediaQuery
+  Box,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogActions,
+  DialogContent,
+  Snackbar,
+  Alert,
 } from "@mui/material";
-import { WarningAmber, CheckCircle } from "@mui/icons-material";
+import { WarningAmber } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
+// import { useMediaQuery } from "@mui/material";
+import {
+  DataGrid,
+  GridColDef,
+  GridSortModel,
+  GridToolbar,
+  GridRowModel,
+  GridRowModes,
+  GridRowModesModel,
+  GridRowId,
+} from "@mui/x-data-grid";
 
 const SuperAdminDashboard = () => {
   const [users, setUsers] = useState<User[]>([]);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [openSaveDialog, setOpenSaveDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [userToUpdate, setUserToUpdate] = useState<Partial<User> | null>(null);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
-  const [toast, setToast] = useState({ open: false, message: "", type: "success" as "success" | "info" | "warning" | "error" });
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    type: "success" as "success" | "info" | "warning" | "error",
+  });
+  const [sortModel, setSortModel] = useState<GridSortModel>([
+    {
+      field: "name",
+      sort: "asc",
+    },
+  ]);
+  const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
 
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  
+  // const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     const getUsers = async () => {
@@ -28,34 +54,69 @@ const SuperAdminDashboard = () => {
     getUsers();
   }, []);
 
-  const handleEdit = (user: User) => setEditingUser(user);
-  const handleChange = (field: keyof User, value: string) => {
-    if (editingUser) setEditingUser({ ...editingUser, [field]: value });
+  const handleEditClick = (id: GridRowId) => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  const handleSave = (user: User) => {
-    const emailExists = users.some((u) => u.email === user.email && u.id !== user.id);
-    if (emailExists) {
-      setToast({ open: true, message: "Email already exists!", type: "error" });
-      return;
-    }
-    setUserToUpdate(user);
-    setOpenSaveDialog(true);
+  const handleSaveClick = (id: GridRowId) => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const confirmUpdate = async () => {
-    if (!userToUpdate || !userToUpdate.id) return;
+  const handleCancelClick = (id: GridRowId) => {
+    setRowModesModel({
+      ...rowModesModel,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    });
+  };
+
+  const handleSortModelChange = (newModel: GridSortModel) => {
+    setSortModel(newModel);
+    const sortedUsers = [...users].sort((a, b) => {
+      const sortItem = newModel[0];
+      if (!sortItem?.field || !sortItem?.sort) return 0;
+
+      const field = sortItem.field as keyof User;
+      const sortDir = sortItem.sort === 'asc' ? 1 : -1;
+
+      const aValue = a[field];
+      const bValue = b[field];
+
+      if (!aValue || !bValue) return 0;
+      if (aValue < bValue) return -1 * sortDir;
+      if (aValue > bValue) return 1 * sortDir;
+      return 0;
+    });
+    setUsers(sortedUsers);
+  };
+
+  const processRowUpdate = async (newRow: GridRowModel) => {
+    if (!newRow?.id) throw new Error("Invalid row data");
+    
     try {
-      await updateUser(userToUpdate.id, userToUpdate);
-      setUsers((prevUsers) =>
-        prevUsers.map((u) => (u.id === userToUpdate.id ? { ...u, ...userToUpdate } : u))
+      const emailExists = users.some(
+        (u) => u.email === newRow.email && u.id !== newRow.id
       );
-      setToast({ open: true, message: "User updated successfully!", type: "success" });
+      if (emailExists) {
+        throw new Error("Email already exists!");
+      }
+      
+      await updateUser(newRow.id.toString(), newRow as User);
+      setUsers((prevUsers) =>
+        prevUsers.map((user) => (user.id === newRow.id ? (newRow as User) : user))
+      );
+      setToast({
+        open: true,
+        message: "User updated successfully!",
+        type: "success",
+      });
+      return newRow;
     } catch (error) {
-      setToast({ open: true, message: "Error updating user!", type: "error" });
-    } finally {
-      setOpenSaveDialog(false);
-      setEditingUser(null);
+      setToast({
+        open: true,
+        message: error instanceof Error ? error.message : "Error updating user!",
+        type: "error",
+      });
+      throw error;
     }
   };
 
@@ -69,7 +130,11 @@ const SuperAdminDashboard = () => {
     try {
       await deleteUser(userToDelete);
       setUsers(users.filter((user) => user.id !== userToDelete));
-      setToast({ open: true, message: "User deleted successfully!", type: "success" });
+      setToast({
+        open: true,
+        message: "User deleted successfully!",
+        type: "success",
+      });
     } catch (error) {
       setToast({ open: true, message: "Error deleting user!", type: "error" });
     } finally {
@@ -77,155 +142,120 @@ const SuperAdminDashboard = () => {
     }
   };
 
+  const columns: GridColDef[] = [
+    {
+      field: "name",
+      headerName: "Name",
+      flex: 1,
+      editable: true,
+    },
+    {
+      field: "email",
+      headerName: "Email",
+      flex: 1,
+      editable: true,
+    },
+    {
+      field: "role",
+      headerName: "Role",
+      flex: 1,
+      editable: true,
+      type: "singleSelect",
+      valueOptions: ["user", "admin", "superadmin"],
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => {
+        const isInEditMode = rowModesModel[params.id]?.mode === GridRowModes.Edit;
+
+        return isInEditMode ? (
+          <Box>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleSaveClick(params.id)}
+              sx={{ mr: 1 }}
+            >
+              Save
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => handleCancelClick(params.id)}
+            >
+              Cancel
+            </Button>
+          </Box>
+        ) : (
+          <Box>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => handleEditClick(params.id)}
+              sx={{ mr: 1 }}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => handleDelete(params.row.id)}
+            >
+              Delete
+            </Button>
+          </Box>
+        );
+      },
+    },
+  ];
+
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 2, backgroundColor: theme.palette.background.default }}>
       <Typography variant="h4" gutterBottom>
         Super Admin Dashboard
       </Typography>
 
-      {isSmallScreen ? (
-        <Box display="flex" flexDirection="column" gap={2}>
-          {users.map((user) => {
-            const isEditing = editingUser?.id === user.id;
-            return (
-              <Paper key={user.id} sx={{ p: 2 }}>
-                <Typography variant="h6">{isEditing ? "Editing User" : user.name}</Typography>
-                <Box mt={1}>
-                  {isEditing ? (
-                    <TextField fullWidth label="Name" value={editingUser.name} onChange={(e) => handleChange("name", e.target.value)} />
-                  ) : (
-                    <Typography>Name: {user.name}</Typography>
-                  )}
-                </Box>
-                <Box mt={1}>
-                  {isEditing ? (
-                    <TextField fullWidth label="Email" value={editingUser.email} onChange={(e) => handleChange("email", e.target.value)} />
-                  ) : (
-                    <Typography>Email: {user.email}</Typography>
-                  )}
-                </Box>
-                <Box mt={1}>
-                  {isEditing ? (
-                    <Select fullWidth value={editingUser.role} onChange={(e) => handleChange("role", e.target.value as User["role"])}>
-                      <MenuItem value="user">User</MenuItem>
-                      <MenuItem value="admin">Admin</MenuItem>
-                      <MenuItem value="superadmin">SuperAdmin</MenuItem>
-                    </Select>
-                  ) : (
-                    <Typography>Role: {user.role}</Typography>
-                  )}
-                </Box>
-                <Box mt={2} display="flex" gap={1}>
-                  {isEditing ? (
-                    <>
-                      <Button fullWidth variant="contained" color="primary" onClick={() => handleSave(editingUser)}>
-                        Save
-                      </Button>
-                      <Button fullWidth variant="outlined" color="secondary" onClick={() => setEditingUser(null)}>
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button fullWidth variant="outlined" onClick={() => handleEdit(user)}>
-                        Edit
-                      </Button>
-                      <Button fullWidth variant="contained" color="error" onClick={() => handleDelete(user.id)}>
-                        Delete
-                      </Button>
-                    </>
-                  )}
-                </Box>
-              </Paper>
-            );
-          })}
-        </Box>
-      ) : (
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Role</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>
-                    {editingUser?.id === user.id ? (
-                      <TextField value={editingUser.name} onChange={(e) => handleChange("name", e.target.value)} />
-                    ) : (
-                      user.name
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingUser?.id === user.id ? (
-                      <TextField value={editingUser.email} onChange={(e) => handleChange("email", e.target.value)} />
-                    ) : (
-                      user.email
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingUser?.id === user.id ? (
-                      <Select value={editingUser.role} onChange={(e) => handleChange("role", e.target.value as User["role"])}>
-                        <MenuItem value="user">User</MenuItem>
-                        <MenuItem value="admin">Admin</MenuItem>
-                        <MenuItem value="superadmin">SuperAdmin</MenuItem>
-                      </Select>
-                    ) : (
-                      user.role
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingUser?.id === user.id ? (
-                      <>
-                        <Button variant="contained" color="primary" onClick={() => handleSave(editingUser)}>
-                          Save
-                        </Button>
-                        <Button variant="outlined" color="secondary" onClick={() => setEditingUser(null)} sx={{ ml: 2 }}>
-                          Cancel
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button variant="outlined" color="secondary" onClick={() => handleEdit(user)}>
-                          Edit
-                        </Button>
-                        <Button variant="contained" color="error" onClick={() => handleDelete(user.id)} sx={{ ml: 2 }}>
-                          Delete
-                        </Button>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+      <Box sx={{ height: "auto", minHeight: 400, width: "100%" }}>
+        <DataGrid
+          rows={users}
+          columns={columns}
+          autoHeight
+          disableRowSelectionOnClick
+          sortModel={sortModel}
+          onSortModelChange={handleSortModelChange}
+          sortingMode="client"
+          filterMode="client"
+          density="comfortable"
+          hideFooterPagination
+          editMode="row"
+          rowModesModel={rowModesModel}
+          processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={(error: Error) => {
+            console.error('Error updating row:', error);
+            setToast({
+              open: true,
+              message: error.message || "Error updating user!",
+              type: "error",
+            });
+          }}
+          slots={{
+            toolbar: GridToolbar,
+          }}
+          sx={{
+            "& .MuiDataGrid-cell": {
+              whiteSpace: "normal",
+              lineHeight: "normal",
+            },
+            // Removed invalid MuiDataGrid reference
+          }}
+        />
+      </Box>
 
       {/* Dialogs and Toast */}
-      <Dialog open={openSaveDialog} onClose={() => setOpenSaveDialog(false)}>
-        <Box sx={{ textAlign: "center", p: 3 }}>
-          <CheckCircle sx={{ fontSize: 60, color: "green" }} />
-          <DialogTitle>Confirm Changes</DialogTitle>
-          <DialogContent>
-            <Typography>Do you want to save these changes?</Typography>
-          </DialogContent>
-          <DialogActions sx={{ justifyContent: "center", mt: 1 }}>
-            <Button onClick={() => setOpenSaveDialog(false)} variant="outlined">
-              Cancel
-            </Button>
-            <Button onClick={confirmUpdate} variant="contained" sx={{ ml: 2 }}>
-              Save
-            </Button>
-          </DialogActions>
-        </Box>
-      </Dialog>
-
       <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
         <Box sx={{ textAlign: "center", p: 3 }}>
           <WarningAmber sx={{ fontSize: 60, color: "red" }} />
@@ -237,14 +267,23 @@ const SuperAdminDashboard = () => {
             <Button onClick={() => setOpenDeleteDialog(false)} variant="outlined">
               Cancel
             </Button>
-            <Button onClick={confirmDelete} variant="contained" color="error" sx={{ ml: 2 }}>
+            <Button
+              onClick={confirmDelete}
+              variant="contained"
+              color="error"
+              sx={{ ml: 2 }}
+            >
               Delete
             </Button>
           </DialogActions>
         </Box>
       </Dialog>
 
-      <Snackbar open={toast.open} autoHideDuration={3000} onClose={() => setToast({ ...toast, open: false })}>
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={3000}
+        onClose={() => setToast({ ...toast, open: false })}
+      >
         <Alert severity={toast.type}>{toast.message}</Alert>
       </Snackbar>
     </Box>

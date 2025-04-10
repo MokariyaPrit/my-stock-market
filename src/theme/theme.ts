@@ -44,6 +44,7 @@ const ERROR = {
   contrastText: '#ffffff',
 };
 
+
 // Create theme settings based on mode (light/dark)
 const getDesignTokens = (mode: PaletteMode): any => ({
   palette: {
@@ -643,7 +644,7 @@ const getDesignTokens = (mode: PaletteMode): any => ({
           },
           '& .MuiDataGrid-cell': {
             borderBottom: `1px solid ${theme.palette.divider}`,
-            color: 'black',
+            color: theme.palette.mode === 'light' ? theme.palette.text.primary : theme.palette.text.primary,
           },
           '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
             outline: 'none',
