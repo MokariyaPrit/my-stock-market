@@ -35,6 +35,9 @@ const Portfolio = () => {
   const [portfolio, setPortfolio] = useState<PortfolioStock[]>([]);
   const [stockPrices, setStockPrices] = useState<{ [key: string]: number }>({});
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [sortKey, setSortKey] = useState<"symbol" | "quantity" | "value" | "pl" | "buying" | "current">("symbol");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -110,6 +113,40 @@ const Portfolio = () => {
     }, 0);
   };
 
+  const handleSort = (key: typeof sortKey) => {
+    if (sortKey === key) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortOrder("asc");
+    }
+  };
+
+  const sortedPortfolio = [...portfolio].sort((a, b) => {
+    const aBuyingPrice = getBuyingPrice(a.symbol);
+    const bBuyingPrice = getBuyingPrice(b.symbol);
+    const aCurrentPrice = stockPrices[a.symbol] || 0;
+    const bCurrentPrice = stockPrices[b.symbol] || 0;
+
+    let aValue = aCurrentPrice * a.quantity;
+    let bValue = bCurrentPrice * b.quantity;
+
+    let aPL = aBuyingPrice ? ((aCurrentPrice - aBuyingPrice) / aBuyingPrice) * 100 : 0;
+    let bPL = bBuyingPrice ? ((bCurrentPrice - bBuyingPrice) / bBuyingPrice) * 100 : 0;
+
+    const compare = {
+      symbol: a.symbol.localeCompare(b.symbol),
+      quantity: a.quantity - b.quantity,
+      value: aValue - bValue,
+      pl: aPL - bPL,
+      buying: aBuyingPrice - bBuyingPrice,
+      current: aCurrentPrice - bCurrentPrice,
+    };
+
+    const result = compare[sortKey];
+    return sortOrder === "asc" ? result : -result;
+  });
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Card sx={{ boxShadow:'0 2px 12px rgba(0, 0, 0, 0.08)', p: 4, borderRadius: 4 }}>
@@ -124,7 +161,7 @@ const Portfolio = () => {
       <Box mt={4}>
         {isMobile ? (
           <Grid container spacing={3}>
-            {portfolio.map((stock) => {
+            {sortedPortfolio.map((stock) => {
               const buyingPrice = getBuyingPrice(stock.symbol);
               const currentPrice = stockPrices[stock.symbol] || 0;
               const profitLossPercent = buyingPrice
@@ -161,16 +198,28 @@ const Portfolio = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Stock</TableCell>
-                  <TableCell align="right">Quantity</TableCell>
-                  <TableCell align="right">Buying Price</TableCell>
-                  <TableCell align="right">Current Price</TableCell>
-                  <TableCell align="right">Value</TableCell>
-                  <TableCell align="right">P/L %</TableCell>
+                  <TableCell onClick={() => handleSort("symbol")} style={{ cursor: "pointer" }}>
+                    Stock {sortKey === "symbol" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </TableCell>
+                  <TableCell align="right" onClick={() => handleSort("quantity")} style={{ cursor: "pointer" }}>
+                    Quantity {sortKey === "quantity" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </TableCell>
+                  <TableCell align="right" onClick={() => handleSort("buying")} style={{ cursor: "pointer" }}>
+                    Buying Price {sortKey === "buying" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </TableCell>
+                  <TableCell align="right" onClick={() => handleSort("current")} style={{ cursor: "pointer" }}>
+                    Current Price {sortKey === "current" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </TableCell>
+                  <TableCell align="right" onClick={() => handleSort("value")} style={{ cursor: "pointer" }}>
+                    Value {sortKey === "value" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </TableCell>
+                  <TableCell align="right" onClick={() => handleSort("pl")} style={{ cursor: "pointer" }}>
+                    P/L % {sortKey === "pl" ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {portfolio.map((stock) => {
+                {sortedPortfolio.map((stock) => {
                   const buyingPrice = getBuyingPrice(stock.symbol);
                   const currentPrice = stockPrices[stock.symbol] || 0;
                   const profitLossPercent = buyingPrice
