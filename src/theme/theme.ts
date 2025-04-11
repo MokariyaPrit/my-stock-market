@@ -121,7 +121,7 @@ const getDesignTokens = (mode: PaletteMode): any => ({
         },
       }),
   },
- 
+
   typography: {
     fontFamily: [
       'Inter',
@@ -215,7 +215,7 @@ const getDesignTokens = (mode: PaletteMode): any => ({
     },
   },
 
- custom: {
+  custom: {
     cardShadow: "0 2px 12px rgba(0, 0, 0, 0.08)", // for cards
     mediumShadow: "0 4px 20px rgba(0, 0, 0, 0.12)", // for modals/popups
     lightShadow: "0 1px 4px rgba(0, 0, 0, 0.06)", // for inputs or hover
@@ -317,8 +317,13 @@ const getDesignTokens = (mode: PaletteMode): any => ({
           boxShadow: 'none',
           textTransform: 'none',
           fontWeight: 600,
+          transition: 'all 0.3s ease',
           '&:hover': {
-            boxShadow: 'none',
+            boxShadow: theme.shadows[4],
+            transform: 'scale(1.02)', // Add hover effect
+          },
+          '&:active': {
+            transform: 'scale(0.98)', // Add active effect
           },
         }),
         contained: ({ theme }: any) => ({
@@ -345,7 +350,7 @@ const getDesignTokens = (mode: PaletteMode): any => ({
         },
         text: {
           '&:hover': {
-            backgroundColor: alpha(PRIMARY.main, 0.08),
+            backgroundColor: alpha(PRIMARY.main, 0.15),
           },
         },
         sizeSmall: {
@@ -361,16 +366,44 @@ const getDesignTokens = (mode: PaletteMode): any => ({
         },
       },
     },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          color: 'inherit',
+          fontWeight: 400,
+        },
+        h1: {
+          fontSize: '2.5rem',
+          fontWeight: 700,
+          lineHeight: 1.2,
+          letterSpacing: '-0.02em',
+        },
+        h2: {
+          fontSize: '2rem',
+          fontWeight: 600,
+          lineHeight: 1.3,
+          letterSpacing: '-0.01em',
+        },
+        body1: {
+          fontSize: '1rem',
+          lineHeight: 1.6,
+          color: '#4b5563', // Neutral gray for body text
+        },
+        caption: {
+          fontSize: '0.75rem',
+          color: '#6b7280', // Lighter gray for captions
+        },
+      },
+    },
     MuiCard: {
       styleOverrides: {
         root: ({ theme }: any) => ({
-          boxShadow: theme.shadows[2],
+          boxShadow: theme.shadows[3],
           borderRadius: theme.shape.borderRadius * 1.5,
-          position: 'relative',
-          zIndex: 0,
-          transition: 'all 0.2s ease-in-out',
+          transition: 'all 0.3s ease',
           '&:hover': {
-            boxShadow: theme.shadows[4],
+            boxShadow: theme.shadows[6],
+            transform: 'translateY(-4px)', // Add hover lift effect
           },
         }),
       },
@@ -538,26 +571,42 @@ const getDesignTokens = (mode: PaletteMode): any => ({
         }),
       },
     },
+    MuiTable: {
+      styleOverrides: {
+        root: {
+          borderCollapse: 'separate',
+          borderSpacing: '0 8px', // Add spacing between rows
+        },
+      },
+    },
     MuiTableCell: {
       styleOverrides: {
-        root: ({ theme }: any) => ({
+        root: ({ theme }: { theme: any }) => ({
           borderBottom: `1px solid ${theme.palette.divider}`,
           padding: '16px',
+          '&:first-of-type': {
+            borderTopLeftRadius: theme.shape.borderRadius,
+            borderBottomLeftRadius: theme.shape.borderRadius,
+          },
+          '&:last-of-type': {
+            borderTopRightRadius: theme.shape.borderRadius,
+            borderBottomRightRadius: theme.shape.borderRadius,
+          },
         }),
         head: {
           fontWeight: 600,
-          // color: '#cbd5e1',
+          color: '#cbd5e1',
         },
       },
     },
     MuiTableRow: {
       styleOverrides: {
-        root: ({ theme }: any) => ({
+        root: ({ theme }: { theme: any }) => ({
           '&:last-child td': {
             borderBottom: 0,
           },
           '&:hover': {
-            backgroundColor: alpha(theme.palette.action.selected, 0.1),
+            backgroundColor: alpha(theme.palette.primary.main, 0.8),
           },
         }),
       },
@@ -620,12 +669,34 @@ const getDesignTokens = (mode: PaletteMode): any => ({
       styleOverrides: {
         tooltip: ({ theme }: any) => ({
           backgroundColor: theme.palette.grey[800],
+          color: theme.palette.common.white,
+          fontSize: '0.875rem',
           borderRadius: theme.shape.borderRadius,
-          padding: '8px 12px',
-          fontSize: '0.75rem',
+          padding: '8px 12px',  
         }),
         arrow: ({ theme }: any) => ({
           color: theme.palette.grey[800],
+        }),
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: ({ theme }: { theme: any }) => ({
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
+          boxShadow: theme.shadows[2],
+          '& .MuiToolbar-root': {
+            minHeight: 64,
+          },
+        }),
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: ({ theme }: { theme: any }) => ({
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.primary,
+          boxShadow: theme.shadows[4],
         }),
       },
     },
