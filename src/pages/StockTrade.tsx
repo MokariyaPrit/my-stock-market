@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { updateStockShares } from "../services/stockService";
+import { updateStockShares, getLastUpdateTimestamp } from "../services/stockService";
 import { addTransaction } from "../services/transactionService";
 import { getUserData, updateUserCoins, updateUserStocks } from "../services/userService";
 import { useAuth } from "../context/AuthContext";
@@ -40,43 +40,40 @@ const StockTrade = () => {
     message: "",
     type: "success",
   });
-  const [timeLeft, setTimeLeft] = useState<string>("10:00"); // Initial value
+  const [timeLeft, setTimeLeft] = useState<string>("Loding"); // Initial value
 
   const [openBuyDialog, setOpenBuyDialog] = useState(false);
   const [openSellDialog, setOpenSellDialog] = useState(false);
 
   // Timer logic
   useEffect(() => {
-    const updateInterval = 600000; // 10 minutes in milliseconds
+    const updateInterval = 300000; // 5 minutes in milliseconds
     const checkInterval = 1000; // Update every second
 
-    const calculateTimeLeft = () => {
+    const calculateTimeLeft = (lastUpdate: number) => {
       const now = Date.now();
-      const lastUpdate = window.localStorage.getItem('lastStockUpdate') 
-        ? Number(window.localStorage.getItem('lastStockUpdate')) 
-        : 0;
       const timeSinceLastUpdate = now - lastUpdate;
       const timeRemaining = updateInterval - (timeSinceLastUpdate % updateInterval);
-      
+
       const minutes = Math.floor(timeRemaining / 60000);
       const seconds = Math.floor((timeRemaining % 60000) / 1000);
-      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
     };
 
-    // Sync with stockService updates
-    const syncTimerWithUpdates = async () => {
-      const now = Date.now();
-      const lastUpdateStored = Number(window.localStorage.getItem('lastStockUpdate') || '0');
-      if (now - lastUpdateStored >= updateInterval) {
-        window.localStorage.setItem('lastStockUpdate', now.toString());
+    const syncTimerWithGlobalUpdate = async () => {
+      try {
+        const lastUpdate = await getLastUpdateTimestamp();
+        setTimeLeft(calculateTimeLeft(lastUpdate));
+      } catch (error) {
+        console.error("❌ Error syncing timer with global update:", error);
+        setTimeLeft("Error: Unable to fetch update time"); // Display error message
       }
     };
 
-    syncTimerWithUpdates();
-    setTimeLeft(calculateTimeLeft());
+    syncTimerWithGlobalUpdate();
 
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
+      syncTimerWithGlobalUpdate();
     }, checkInterval);
 
     return () => clearInterval(timer);
