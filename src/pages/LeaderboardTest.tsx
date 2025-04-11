@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import PersonIcon from "@mui/icons-material/Person";
+import { Link } from "react-router-dom";
 
 const LeaderboardTest = () => {
   const [users, setUsers] = useState<LeaderboardUser[]>([]);
@@ -70,12 +71,16 @@ const LeaderboardTest = () => {
                   <ListItem
                     key={user.id}
                     divider={index < users.length - 1}
+                    component={Link}
+                    to={`/user/${user.id}`}
                     sx={{
                       py: 1.5,
                       "&:hover": {
                         bgcolor: theme.palette.action.hover,
                         cursor: "pointer",
                       },
+                      textDecoration: "none",
+                      color: "inherit",
                     }}
                   >
                     <ListItemAvatar>
